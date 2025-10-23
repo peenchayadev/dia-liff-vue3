@@ -1,0 +1,72 @@
+/* Start - LINESeed */
+@font-face {
+  font-family: 'LINE Seed';
+  font-style: normal;
+  font-weight: 200;
+  src: local('LINESeed'), local('LINESeedSansTH'),
+        url('/fonts/LINESeed/WOFF2/LINESeedSansTH_W_Th.woff2') format('woff2'),
+        url('/fonts/LINESeed/WOFF/LINESeedSansTH_W_Th.woff') format('woff');
+}
+@font-face {
+  font-family: 'LINE Seed';
+  font-style: normal;
+  font-weight: 400;
+  src: local('LINESeed'), local('LINESeedSansTH'),
+        url('/fonts/LINESeed/WOFF2/LINESeedSansTH_W_Rg.woff2') format('woff2'),
+        url('/fonts/LINESeed/WOFF/LINESeedSansTH_W_Rg.woff') format('woff');
+}
+@font-face {
+  font-family: 'LINE Seed';
+  font-style: normal;
+  font-weight: 700;
+  src: local('LINESeed'), local('LINESeedSansTH'),
+        url('/fonts/LINESeed/WOFF2/LINESeedSansTH_W_Bd.woff2') format('woff2'),
+        url('/fonts/LINESeed/WOFF/LINESeedSansTH_W_Bd.woff') format('woff');
+}
+@font-face {
+  font-family: 'LINE Seed';
+  font-style: normal;
+  font-weight: 800;
+  src: local('LINESeed'), local('LINESeedSansTH'),
+        url('/fonts/LINESeed/WOFF2/LINESeedSansTH_W_XBd.woff2') format('woff2'),
+        url('/fonts/LINESeed/WOFF/LINESeedSansTH_W_XBd.woff') format('woff');
+}
+@font-face {
+  font-family: 'LINE Seed';
+  font-style: normal;
+  font-weight: 900;
+  src: local('LINESeed'), local('LINESeedSansTH'),
+        url('/fonts/LINESeed/WOFF2/LINESeedSansTH_W_He.woff2') format('woff2'),
+        url('/fonts/LINESeed/WOFF/LINESeedSansTH_W_He.woff') format('woff');
+}
+/* End - LINESeed */
+
+/* Start - TH SarabunPSK */
+@font-face {
+  font-family: 'TH SarabunPSK';
+  src: url('/fonts/THSarabunPSK/THSarabun.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'TH SarabunPSK';
+  src: url('/fonts/THSarabunPSK/THSarabun_Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'TH SarabunPSK';
+  src: url('/fonts/THSarabunPSK/THSarabun_Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'TH SarabunPSK';
+  src: url('/fonts/THSarabunPSK/THSarabun_Bold_Italic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+}
+/* End - TH SarabunPSK */
