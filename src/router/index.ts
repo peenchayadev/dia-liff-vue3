@@ -7,6 +7,7 @@ import {
   type Router, 
   type RouteRecordRaw 
 } from 'vue-router'
+import mainRouter from './modules/main.router'
 
 export interface IRouteRedirect {
   name: string
@@ -18,6 +19,7 @@ export const routes: RouteRecordRaw[] = [
     name: 'HomePage',
     component: (): ComponentOptions => import('@/pages/HomePage.vue')
   },
+  mainRouter
 ]
 
 export const routerConfig = {
