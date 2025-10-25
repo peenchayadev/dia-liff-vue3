@@ -1,39 +1,30 @@
 <template>
-	<UseTransition>
-		<DefaultLayout
-			v-if="pageReady && layoutName === 'default'"
-			class="layout-default" />
-		<BlankLayout
-			v-else-if="pageReady && layoutName === 'blank'"
-			class="layout-blank" />
-	</UseTransition>
+	<DefaultLayout
+		v-if="pageReady && layoutName === 'default'"
+		class="layout-default" />
+	<BlankLayout
+		v-else-if="pageReady && layoutName === 'blank'"
+		class="layout-blank" />
 </template>
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { 
-	ref,
-	computed, 
-	onMounted
-} from 'vue'
-import liff from '@line/liff'
-import { 
-	initLiff, 
-	loginLiff 
-} from './plugin/liff.plugin'
-import { useAuthStore } from './stores/Auth'
-import { handleLoading } from './utils/HandleLoading'
-import AuthProvider, { type IAuthProvider } from './resources/provider/Auth.provider'
+import { computed, onMounted, ref } from 'vue'
+
 import BlankLayout from './layouts/BlankLayout.vue'
 import DefaultLayout from './layouts/DefaultLayout.vue'
-import UseTransition from './components/transition/UseTransition.vue'
+import liff from '@line/liff'
+import { initLiff, loginLiff } from './plugin/liff.plugin'
+import { useAuthStore } from './stores/Auth'
+import AuthProvider, { type IAuthProvider } from './resources/provider/Auth.provider'
 
 const route = useRoute()
 
 const authStore = useAuthStore()
 
-const authService: IAuthProvider = new AuthProvider()
+const authService : IAuthProvider = new AuthProvider()
 
+const isInit = ref<boolean>(false)
 const pageReady = ref<boolean>(false)
 
 const layoutName = computed((): string => {
@@ -41,62 +32,61 @@ const layoutName = computed((): string => {
 	return layout?.toLowerCase() || 'default'
 })
 
-async function authWithLiff(): Promise<void> {
-	if (liff.isLoggedIn()) {
-		const lineProfile = await liff.getProfile()
-		const accessToken = await liff.getIDToken()
-
-		if (!accessToken) {
+async function authLiff (): Promise<void> {
+	try {
+		if (!liff.isLoggedIn()) {
 			await loginLiff()
 			return
 		}
 
-		try {
-			const response = await authService.authLiff({
-				accessToken
-			})
-
-			authStore.stampLineIdToken(response.data.jwt)
-			authStore.userToken.accessToken = response.data.jwt
-			authStore.user = {
-				id: null,
-				uid: response.data.user?.lineUserId,
-				imageUrl: lineProfile.pictureUrl || '',
-				displayName: lineProfile.displayName
-			}
-		} catch (error) {
-			console.error('Failed to authenticate with Liff:', error)
+		const lineProfile = await liff.getProfile()
+		const accessToken = await liff.getIDToken()
+		
+		if (!accessToken) {
+			liff.login()
+			return
 		}
-	} else {
-		await loginLiff()
-	}
-}
 
-async function authLogin(): Promise<void> {
-	handleLoading(authWithLiff)
-}
+		const res = await authService.authLiff({
+			accessToken: accessToken
+		})
+		
+		authStore.stampLineIdToken(res.data.jwt)
+		authStore.userToken.accessToken = res.data.jwt
+		authStore.user = {
+			id: null,
+			uid: res.data.user?.lineUserId,
+			imageUrl: lineProfile.pictureUrl || '',
+			displayName: lineProfile.displayName
+		}
+	} catch (error: any) {
+		console.error('Auth LIFF error:', error)
+		}
+	}
 
 async function initializeApp(): Promise<void> {
-	await initLiff()
-
-	if (!liff.isLoggedIn()) {
-		await loginLiff()
-
-		setTimeout(async () => {
-			if (liff.isLoggedIn()) {
-				await authLogin()
-			}
-		}, 1000)
+	try {
+		await initLiff()
+		if (liff.isLoggedIn()) {
+			await authLiff()
+		} else {
+			await loginLiff()
+			setTimeout(async () => {
+				if (liff.isLoggedIn()) {
+					await authLiff()
+				}
+			}, 1000)
+		}
+	} catch (error) {
+		console.error('App initialization error:', error)
+	} finally {
+		isInit.value = true
+		pageReady.value = true
 	}
 }
 
-function initApp(): void {
-	handleLoading(initializeApp)
-}
-
-onMounted((): void => {
-	pageReady.value = true
-	initApp()
+onMounted(async (): Promise<void> => {
+	await initializeApp()
 })
 </script>
 

@@ -1,4 +1,4 @@
-import type { RouteLocationRaw } from 'vue-router'
+import type { IRouteRedirect } from '@/router'
 
 type TPaginationLimit = 20 | 50 | 100
 
@@ -13,14 +13,9 @@ export interface IPagination extends IPaginationRequest {
 }
 
 export interface IMenu {
-  title: string
-  icon?: string
-  activeIcon?: string
-  to?: RouteLocationRaw
-  bottom?: boolean
-  root?: string
-  subMenus?: IMenu[]
-  disabled?: boolean
+	name: string
+	to: IRouteRedirect
+	icon: string
 }
 
 export interface IBaseOptions<T = string | number> {
