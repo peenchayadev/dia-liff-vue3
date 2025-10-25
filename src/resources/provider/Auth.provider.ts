@@ -4,6 +4,8 @@ import type { IGetLoginLiffResponse } from '@/models/Response/AuthRes.model'
 
 export interface IAuthProvider {
 	authLiff(query: IAuthRequest): Promise<IGetLoginLiffResponse>
+	refreshToken(lineIdToken: string): Promise<IGetLoginLiffResponse>
+	checkToken(lineIdToken: string): Promise<any>
 }
 
 class AuthProvider extends HttpRequest implements IAuthProvider {
@@ -11,6 +13,16 @@ class AuthProvider extends HttpRequest implements IAuthProvider {
 
 	public async authLiff(query: IAuthRequest): Promise<IGetLoginLiffResponse> {
 		const response = await this.post(`${this.urlPrefix}/line-verify`, query)
+		return response
+	}
+
+	public async refreshToken(lineIdToken: string): Promise<IGetLoginLiffResponse> {
+		const response = await this.post(`${this.urlPrefix}/refresh-token`, { lineIdToken })
+		return response
+	}
+
+	public async checkToken(lineIdToken: string): Promise<any> {
+		const response = await this.post(`${this.urlPrefix}/check-token`, { lineIdToken })
 		return response
 	}
 }

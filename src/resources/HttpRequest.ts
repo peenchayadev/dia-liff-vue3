@@ -40,7 +40,10 @@ class HttpRequest implements IHttpRequest {
       withCredentials: true
     })
 
-    this.axiosInstance.interceptors.request.use((config: any): any => onRequest(config), onRequestError)
+    this.axiosInstance.interceptors.request.use(
+      async (config: any): Promise<any> => await onRequest(config), 
+      onRequestError
+    )
 
     this.axiosInstance.interceptors.response.use(onResponse, onResponseError)
   }

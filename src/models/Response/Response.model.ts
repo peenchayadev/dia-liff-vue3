@@ -2,7 +2,8 @@ import type { IPagination } from "../Global.model"
 
 
 export interface IBaseSuccessResponse<T = any> {
-  message: string
+  success?: boolean
+  message?: string
   data: T
 }
 
