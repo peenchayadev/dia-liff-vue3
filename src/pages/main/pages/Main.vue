@@ -4,35 +4,78 @@
 			<div class="w-[72px] h-[72px] rounded-full bg-white overflow-hidden">
 				<MainImage :imageUrl="authStore.user.imageUrl || ''" />
 			</div>
-			<p class="ml-4 text-[20px]">
-				สวัสดีคุณ {{ lineName }}
-			</p>
+			<p class="ml-4 text-[20px]">สวัสดีคุณ {{ lineName }}</p>
 		</div>
 		<div>
-			<TodaySummaryCard />
+			<TodaySummaryCard :item="items" />
 		</div>
 		<div class="my-6 ml-1">
-			<p class="font-bold">
-				ค่าระดับน้ำตาลในเลือดวันนี้
-			</p>
+			<p class="font-bold">ค่าระดับน้ำตาลในเลือดวันนี้</p>
 		</div>
-		<div class="mt-4">
-			<DailyGlucoseCard />
+		<div class="w-full my-4">
+			<TodayListCard
+				:items="today"
+				@delete="onDelete($event)" />
 		</div>
 	</div>
+		<DeleteModal 
+		ref="DeleteModalRef" 
+		@confirm="onConfirmDelete"/>
 </template>
 
 <script setup lang="ts">
-import MainImage from '@/components/MainImage.vue'
+import { computed, onMounted, ref } from 'vue'
 import { useAuthStore } from '@/stores/Auth'
-import { computed } from 'vue'
+import { handleLoading } from '@/utils/HandleLoading'
+import type { IGlucoseSummary, IGlucoseToday } from '@/models/Response/GlucoseResponse.model'
+import GlucoseProvider from '@/resources/provider/Glucose.provider'
+import type { IGlucoseProvider } from '@/resources/provider/Glucose.provider'
+import MainImage from '@/components/MainImage.vue'
 import TodaySummaryCard from '../components/TodaySummaryCard.vue'
-import DailyGlucoseCard from '../components/DailyGlucoseCard.vue'
+import DeleteModal from '@/components/Modal/DeleteModal.vue'
+import TodayListCard from '../components/TodayListCard.vue'
 
 const authStore = useAuthStore()
 
+const GlucoseService: IGlucoseProvider = new GlucoseProvider()
+
+const DeleteModalRef = ref<InstanceType<typeof DeleteModal>>()
+
 const lineName = computed((): string => {
 	return authStore.user.displayName || ''
+})
+
+const selectedDeleteId = ref<string>('')
+
+const today = ref<IGlucoseToday[]>([])
+const items = ref<IGlucoseSummary>()
+
+async function useFetchTodaySummary(): Promise<void> {
+	const response = await GlucoseService.getTodaySummary()
+	items.value = response.data
+}
+
+async function useFetchTodayList(): Promise<void> {
+	const response = await GlucoseService.getTodayList()
+	today.value = response.data
+}
+
+function fetch(): void {
+	handleLoading(useFetchTodaySummary)
+	handleLoading(useFetchTodayList)
+}
+
+function onDelete(id: string): void {
+	selectedDeleteId.value = id
+	DeleteModalRef.value?.onOpen()
+}
+
+function onConfirmDelete(): void {
+	console.log('Deleting item with ID:', selectedDeleteId.value)
+}
+
+onMounted((): void => {
+	fetch()
 })
 </script>
 

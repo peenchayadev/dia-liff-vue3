@@ -19,7 +19,7 @@
           </span>
 				</p>
 				<p class="text-sm opacity-80 mt-1">
-          อยู่ในเกณฑ์{{ item?.latestLevel?.status }}
+          อยู่ในเกณฑ์{{ formatGlucoseStatus(item?.latestLevel?.status || 'HIGH') }}
         </p>
 			</div>
 			<Icon icon="lucide:heart-handshake" />
@@ -53,11 +53,13 @@
 </template>
 
 <script setup lang="ts">
-import CardBase from '@/components/Base/CardBase.vue'
 import { Icon } from '@iconify/vue'
+import { formatGlucoseStatus } from '@/models/Glucose/GlucoseStatus.enum'
+import type { IGlucoseSummary } from '@/models/Response/GlucoseResponse.model'
+import CardBase from '@/components/Base/CardBase.vue'
 
 interface IProps {
-	item?: any
+	item?: IGlucoseSummary
 }
 
 defineProps<IProps>()

@@ -14,6 +14,8 @@ dayjs.extend(timezone)
 dayjs.extend(duration)
 dayjs.tz.setDefault('Asia/Bangkok')
 
+export { dayjs }
+
 export default {
   install: (app: any): void => {
     app.config.globalProperties.$dayjs = dayjs
