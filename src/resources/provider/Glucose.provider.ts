@@ -10,6 +10,16 @@ export interface IGlucoseProvider {
 	deleteTodayRecord (
 		id: string
 	): Promise<IGetGlucoseTodayListResponse>
+	updateTodayRecord (
+		id: string,
+		data: IUpdateGlucoseRequest
+	): Promise<IGetGlucoseTodayListResponse>
+}
+
+export interface IUpdateGlucoseRequest {
+	value?: number
+	period?: string
+	note?: string
 }
 
 class GlucoseProvider extends HttpRequest implements IGlucoseProvider {
@@ -29,6 +39,14 @@ class GlucoseProvider extends HttpRequest implements IGlucoseProvider {
 		id: string
 	): Promise<IGetGlucoseTodayListResponse> {
 		const response = await this.delete(`${this.urlPrefix}/${id}`)
+		return response
+	}
+
+	public async updateTodayRecord (
+		id: string,
+		data: IUpdateGlucoseRequest
+	): Promise<IGetGlucoseTodayListResponse> {
+		const response = await this.put(`${this.urlPrefix}/${id}`, data)
 		return response
 	}
 }

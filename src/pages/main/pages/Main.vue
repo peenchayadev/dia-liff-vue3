@@ -15,12 +15,19 @@
 		<div class="w-full my-4">
 			<TodayListCard
 				:items="today"
-				@delete="onDelete($event)" />
+				@delete="onDelete($event)"
+				@edit="onEdit($event)" />
 		</div>
 	</div>
 		<DeleteModal 
 		ref="DeleteModalRef" 
 		@confirm="deleteTodayRecord()"/>
+		
+		<EditGlucoseModal
+			:is-open="isEditModalOpen"
+			:item="selectedEditItem"
+			@close="closeEditModal"
+			@confirm="updateTodayRecord" />
 </template>
 
 <script setup lang="ts">
@@ -33,6 +40,7 @@ import type { IGlucoseProvider } from '@/resources/provider/Glucose.provider'
 import MainImage from '@/components/MainImage.vue'
 import TodaySummaryCard from '../components/TodaySummaryCard.vue'
 import DeleteModal from '@/components/Modal/DeleteModal.vue'
+import EditGlucoseModal from '@/components/Modal/EditGlucoseModal.vue'
 import TodayListCard from '../components/TodayListCard.vue'
 
 const authStore = useAuthStore()
@@ -46,6 +54,8 @@ const lineName = computed((): string => {
 })
 
 const selectedDeleteId = ref<string>('')
+const selectedEditItem = ref<IGlucoseToday | null>(null)
+const isEditModalOpen = ref<boolean>(false)
 
 const today = ref<IGlucoseToday[]>([])
 const items = ref<IGlucoseSummary>()
@@ -65,8 +75,20 @@ async function useDeleteTodayRecord(): Promise<void> {
 	fetch()
 }
 
+async function useUpdateTodayRecord(data: { value: number; period: string; note?: string }): Promise<void> {
+	if (selectedEditItem.value) {
+		await GlucoseService.updateTodayRecord(selectedEditItem.value.id, data)
+		fetch()
+	}
+}
+
 function deleteTodayRecord (): void {
 	useDeleteTodayRecord()
+}
+
+function updateTodayRecord(data: { value: number; period: string; note?: string }): void {
+	handleLoading(() => useUpdateTodayRecord(data))
+	closeEditModal()
 }
 
 function fetch(): void {
@@ -77,6 +99,16 @@ function fetch(): void {
 function onDelete(id: string): void {
 	selectedDeleteId.value = id
 	DeleteModalRef.value?.onOpen()
+}
+
+function onEdit(item: IGlucoseToday): void {
+	selectedEditItem.value = item
+	isEditModalOpen.value = true
+}
+
+function closeEditModal(): void {
+	isEditModalOpen.value = false
+	selectedEditItem.value = null
 }
 
 onMounted((): void => {
