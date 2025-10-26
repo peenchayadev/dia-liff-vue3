@@ -20,7 +20,7 @@
 	</div>
 		<DeleteModal 
 		ref="DeleteModalRef" 
-		@confirm="onConfirmDelete"/>
+		@confirm="deleteTodayRecord()"/>
 </template>
 
 <script setup lang="ts">
@@ -60,6 +60,15 @@ async function useFetchTodayList(): Promise<void> {
 	today.value = response.data
 }
 
+async function useDeleteTodayRecord(): Promise<void> {
+	await GlucoseService.deleteTodayRecord(selectedDeleteId.value)
+	fetch()
+}
+
+function deleteTodayRecord (): void {
+	useDeleteTodayRecord()
+}
+
 function fetch(): void {
 	handleLoading(useFetchTodaySummary)
 	handleLoading(useFetchTodayList)
@@ -68,10 +77,6 @@ function fetch(): void {
 function onDelete(id: string): void {
 	selectedDeleteId.value = id
 	DeleteModalRef.value?.onOpen()
-}
-
-function onConfirmDelete(): void {
-	console.log('Deleting item with ID:', selectedDeleteId.value)
 }
 
 onMounted((): void => {

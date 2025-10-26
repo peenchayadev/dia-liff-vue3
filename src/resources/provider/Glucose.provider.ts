@@ -7,17 +7,29 @@ import HttpRequest from '../HttpRequest'
 export interface IGlucoseProvider {
 	getTodaySummary(): Promise<IGetGlucoseSummaryResponse>
 	getTodayList(): Promise<IGetGlucoseTodayListResponse>
+	deleteTodayRecord (
+		id: string
+	): Promise<IGetGlucoseTodayListResponse>
 }
 
 class GlucoseProvider extends HttpRequest implements IGlucoseProvider {
 	private urlPrefix: string = '/glucose'
 
 	public async getTodaySummary(): Promise<IGetGlucoseSummaryResponse> {
-		return this.get(`${this.urlPrefix}/summary/today`)
+		const response = await this.get(`${this.urlPrefix}/summary/today`)
+		return response
 	}
 
-		public async getTodayList (): Promise<IGetGlucoseTodayListResponse> {
-		return this.get(`${this.urlPrefix}/today`)
+	public async getTodayList (): Promise<IGetGlucoseTodayListResponse> {
+		const response = await this.get(`${this.urlPrefix}/today`)
+		return response
+	}
+
+	public async deleteTodayRecord (
+		id: string
+	): Promise<IGetGlucoseTodayListResponse> {
+		const response = await this.delete(`${this.urlPrefix}/${id}`)
+		return response
 	}
 }
 
