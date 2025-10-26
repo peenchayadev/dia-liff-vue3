@@ -56,7 +56,7 @@ async function checkTokenExpiry(): Promise<boolean> {
       return false
     }
 
-    const payload = JSON.parse(atob(tokenParts[1]))
+    const payload = JSON.parse(atob(tokenParts[1] || ''))
     const now = Math.floor(Date.now() / 1000)
     const timeUntilExpiry = payload.exp - now
 
@@ -90,7 +90,7 @@ async function refreshTokenIfNeeded(): Promise<boolean> {
     }
 
     // Check if token is expired
-    const payload = JSON.parse(atob(tokenParts[1]))
+    const payload = JSON.parse(atob(tokenParts[1] || ''))
     const now = Math.floor(Date.now() / 1000)
     const timeUntilExpiry = payload.exp - now
 
@@ -133,7 +133,7 @@ function isTokenValid(): boolean {
       return false
     }
 
-    const payload = JSON.parse(atob(tokenParts[1]))
+    const payload = JSON.parse(atob(tokenParts[1] || ''))
     const now = Math.floor(Date.now() / 1000)
     const timeUntilExpiry = payload.exp - now
 

@@ -31,8 +31,8 @@ const route = useRoute()
 
 const menu = ref<IMenu[]>([
 	{ name: 'หน้าแรก', to: { name: 'Main' }, icon: 'lucide:house' },
-	{ name: 'นัดหมาย', to: { name: '' }, icon: 'lucide:calendar' },
-	{ name: 'อาหาร', to: { name: '' }, icon: 'lucide:utensils' },
+	{ name: 'นัดหมาย', to: { name: 'Appointment' }, icon: 'lucide:calendar' },
+	{ name: 'อาหาร', to: { name: 'Food' }, icon: 'lucide:utensils' },
 	{ name: 'ประวัติ', to: { name: '' }, icon: 'lucide:chart-column-increasing' }
 ])
 

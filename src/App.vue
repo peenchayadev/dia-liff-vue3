@@ -1,10 +1,15 @@
 <template>
-	<DefaultLayout
-		v-if="pageReady && layoutName === 'default'"
-		class="layout-default" />
-	<BlankLayout
-		v-else-if="pageReady && layoutName === 'blank'"
-		class="layout-blank" />
+	<!-- Loading Screen -->
+	<div v-if="!pageReady" class="fixed inset-0 bg-gray-50 flex items-center justify-center z-50">
+		<div class="text-center">
+			<div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+			<p class="text-gray-600">กำลังเข้าสู่ระบบ...</p>
+		</div>
+	</div>
+
+	<!-- Main App -->
+	<DefaultLayout v-else-if="layoutName === 'default'" class="layout-default" />
+	<BlankLayout v-else-if="layoutName === 'blank'" class="layout-blank" />
 </template>
 
 <script setup lang="ts">
@@ -23,7 +28,7 @@ const route = useRoute()
 
 const authStore = useAuthStore()
 
-const authService : IAuthProvider = new AuthProvider()
+const authService: IAuthProvider = new AuthProvider()
 
 const isInit = ref<boolean>(false)
 const pageReady = ref<boolean>(false)
@@ -33,7 +38,7 @@ const layoutName = computed((): string => {
 	return layout?.toLowerCase() || 'default'
 })
 
-async function authLiff (): Promise<void> {
+async function authLiff(): Promise<void> {
 	try {
 		if (!liff.isLoggedIn()) {
 			console.log('LIFF not logged in, attempting login...')
@@ -43,7 +48,7 @@ async function authLiff (): Promise<void> {
 
 		console.log('✅ LIFF logged in, getting user profile...')
 		const lineProfile = await liff.getProfile()
-		
+
 		if (!lineProfile.userId || !lineProfile.displayName) {
 			console.log('❌ Missing LINE profile data, redirecting to login')
 			liff.login()
@@ -52,13 +57,13 @@ async function authLiff (): Promise<void> {
 
 		console.log(`🔍 Got LINE profile: ${lineProfile.userId}`)
 		console.log('Attempting to authenticate with LINE profile...')
-		
+
 		const res = await authService.authLiff({
 			lineUserId: lineProfile.userId,
 			displayName: lineProfile.displayName,
 			pictureUrl: lineProfile.pictureUrl
 		})
-		
+
 		if (res?.success !== false && res?.data?.jwt) {
 			console.log('✅ Authentication successful')
 			authStore.stampLineIdToken(res.data.jwt)
@@ -75,7 +80,7 @@ async function authLiff (): Promise<void> {
 		}
 	} catch (error: any) {
 		console.error('Auth LIFF error:', error)
-		
+
 		// If authentication fails, redirect to login immediately
 		if (error.response?.status === 401 || error.message?.includes('expired')) {
 			console.log('Authentication failed - redirecting to login')
@@ -91,6 +96,15 @@ async function authLiff (): Promise<void> {
 async function initializeApp(): Promise<void> {
 	try {
 		await initLiff()
+
+		// Check if we already have a valid JWT token
+		if (authStore.userToken.accessToken && authStore.user.uid) {
+			console.log('✅ Already authenticated, skipping LIFF auth')
+			pageReady.value = true
+			tokenManager.startTokenMonitoring()
+			return
+		}
+
 		if (liff.isLoggedIn()) {
 			console.log('✅ LIFF logged in, proceeding with authentication')
 			await authLiff()
@@ -123,5 +137,4 @@ onUnmounted((): void => {
 })
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

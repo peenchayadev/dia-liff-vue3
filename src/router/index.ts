@@ -8,6 +8,8 @@ import {
   type RouteRecordRaw 
 } from 'vue-router'
 import mainRouter from './modules/main.router'
+import appointmentRouter from './modules/appointment.router'
+import foodRouter from './modules/food.router'
 
 export interface IRouteRedirect {
   name: string
@@ -19,7 +21,9 @@ export const routes: RouteRecordRaw[] = [
     name: 'HomePage',
     component: (): ComponentOptions => import('@/pages/HomePage.vue')
   },
-  mainRouter
+  mainRouter,
+  appointmentRouter,
+  foodRouter
 ]
 
 export const routerConfig = {
@@ -34,18 +38,5 @@ const DEFAULT_TITLE: string = 'Dia-Liff'
 router.afterEach((to: RouteLocationNormalized): void => {
   document.title = to?.meta?.title ? `${DEFAULT_TITLE} | ${to.meta.title}` : DEFAULT_TITLE
 })
-
-// router.beforeEach((
-//   to: RouteLocationNormalized,
-//   _from: RouteLocationNormalized,
-//   next: NavigationGuardNext): void => {
-//   const userStore = useAuthStore()
-//   const userToken: string = userStore?.userToken?.accessToken
-//   if (to?.meta?.auth && !userToken) {
-//     router.replace({ name: 'LoginPage' })
-//     return
-//   }
-//   next()
-// })
 
 export default router
