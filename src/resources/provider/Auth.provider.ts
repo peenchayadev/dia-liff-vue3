@@ -12,6 +12,7 @@ class AuthProvider extends HttpRequest implements IAuthProvider {
 	private urlPrefix: string = '/auth'
 
 	public async authLiff(query: IAuthRequest): Promise<IGetLoginLiffResponse> {
+		console.log(`🔍 Sending auth request for LINE user: ${query.lineUserId}`)
 		const response = await this.post(`${this.urlPrefix}/line-verify`, query)
 		return response
 	}

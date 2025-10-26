@@ -1,3 +1,5 @@
 export interface IAuthRequest {
-  accessToken: string
+  lineUserId: string
+  displayName: string
+  pictureUrl?: string
 }

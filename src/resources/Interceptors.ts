@@ -2,17 +2,7 @@ import { useAuthStore } from '@/stores/Auth'
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios'
 import humps from 'humps'
 import liff from '@line/liff'
-import { refreshTokenIfNeeded } from '@/plugin/liff.plugin'
-import axios from 'axios'
-
-let authService: any = null
-async function getAuthService() {
-  if (!authService) {
-    const { default: AuthProvider } = await import('./provider/Auth.provider')
-    authService = new AuthProvider()
-  }
-  return authService
-}
+import { tokenManager } from '@/utils/TokenManager'
 
 function getAuthStore() {
   try {
@@ -26,13 +16,6 @@ function getAuthStore() {
 export async function onRequest(config: AxiosRequestConfig): Promise<AxiosRequestConfig> {
   config.withCredentials = true
   config.headers = config.headers ?? {}
-
-  // Check and refresh token if needed before making request
-  try {
-    await refreshTokenIfNeeded()
-  } catch (error) {
-    console.warn('Token refresh check failed:', error)
-  }
 
   // Add Authorization header if we have a token
   const authStore = getAuthStore()
@@ -95,66 +78,35 @@ export async function onResponseError(error: AxiosError): Promise<any> {
     return Promise.reject(newError?.response?.data)
   }
 
-  // Handle 401 errors with token refresh
+  // Handle 401 errors - JWT token expired or invalid, redirect to login immediately
   if (newError.response?.status === 401 && !originalRequest._retry) {
     originalRequest._retry = true
 
     try {
-      console.log('401 error detected, attempting token refresh...')
+      console.log('401 error detected - JWT token expired, redirecting to login')
 
-      if (!liff.isLoggedIn()) {
-        console.log('LIFF not logged in, redirecting to login')
-        await liff.login()
-        return Promise.reject(newError.response?.data)
+      // Clear auth store
+      const authStore = getAuthStore()
+      if (authStore) {
+        authStore.logout()
       }
 
-      const lineIdToken = liff.getIDToken()
-      if (!lineIdToken) {
-        console.log('No LINE ID token available, redirecting to login')
-        liff.login()
-        return Promise.reject(newError.response?.data)
-      }
+      // Stop token monitoring to prevent loops
+      tokenManager.stopTokenMonitoring()
 
-      const authSvc = await getAuthService()
-      const refreshResponse = await authSvc.refreshToken(lineIdToken)
+      // Force re-login immediately
+      liff.login()
 
-      if (refreshResponse?.success !== false && refreshResponse?.data?.jwt) {
-        console.log('Token refreshed successfully')
+      // Don't return error, just redirect
+      return new Promise(() => {}) // Never resolve to prevent further processing
 
-        const authStore = getAuthStore()
-        if (authStore) {
-          authStore.stampLineIdToken(refreshResponse.data.jwt)
-          authStore.userToken.accessToken = refreshResponse.data.jwt
-          authStore.user = {
-            id: null,
-            uid: refreshResponse.data.user?.lineUserId,
-            imageUrl: refreshResponse.data.user?.pictureUrl || '',
-            displayName: refreshResponse.data.user?.displayName || ''
-          }
-        }
-
-        originalRequest.headers.Authorization = `Bearer ${refreshResponse.data.jwt}`
-
-        return axios(originalRequest)
-      } else {
-        throw new Error('Token refresh failed - no JWT returned')
-      }
-
-    } catch (refreshError) {
-      console.error('Token refresh failed:', refreshError)
-
-      try {
-        liff.login()
-      } catch (loginError) {
-        console.error('LIFF login failed:', loginError)
-        const authStore = getAuthStore()
-        if (authStore) {
-          authStore.logout()
-        }
-        window.location.href = `https://access.line.me`
-      }
-
-      return Promise.reject(newError.response?.data)
+    } catch (loginError) {
+      console.error('Error handling 401:', loginError)
+      
+      // Fallback to LINE access URL
+      window.location.href = 'https://access.line.me'
+      
+      return new Promise(() => {}) // Never resolve
     }
   }
 

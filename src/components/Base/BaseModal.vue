@@ -13,9 +13,13 @@
 					@click.stop>
 					<div class="p-6">
 						<slot name="content" />
-						<div class="flex gap-4">
-							<slot name="actions" />
-						</div>
+					</div>
+					
+					<!-- Actions Footer -->
+					<div 
+						v-if="$slots.actions"
+						class="flex gap-3 p-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+						<slot name="actions" />
 					</div>
 				</div>
 			</div>

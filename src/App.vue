@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 import BlankLayout from './layouts/BlankLayout.vue'
 import DefaultLayout from './layouts/DefaultLayout.vue'
@@ -17,6 +17,7 @@ import liff from '@line/liff'
 import { initLiff, loginLiff } from './plugin/liff.plugin'
 import { useAuthStore } from './stores/Auth'
 import AuthProvider, { type IAuthProvider } from './resources/provider/Auth.provider'
+import { tokenManager } from './utils/TokenManager'
 
 const route = useRoute()
 
@@ -40,22 +41,26 @@ async function authLiff (): Promise<void> {
 			return
 		}
 
+		console.log('✅ LIFF logged in, getting user profile...')
 		const lineProfile = await liff.getProfile()
-		const accessToken = liff.getIDToken()
 		
-		if (!accessToken) {
-			console.log('No LINE ID token available, redirecting to login')
+		if (!lineProfile.userId || !lineProfile.displayName) {
+			console.log('❌ Missing LINE profile data, redirecting to login')
 			liff.login()
 			return
 		}
 
-		console.log('Attempting to authenticate with LINE ID token...')
+		console.log(`🔍 Got LINE profile: ${lineProfile.userId}`)
+		console.log('Attempting to authenticate with LINE profile...')
+		
 		const res = await authService.authLiff({
-			accessToken: accessToken
+			lineUserId: lineProfile.userId,
+			displayName: lineProfile.displayName,
+			pictureUrl: lineProfile.pictureUrl
 		})
 		
 		if (res?.success !== false && res?.data?.jwt) {
-			console.log('Authentication successful')
+			console.log('✅ Authentication successful')
 			authStore.stampLineIdToken(res.data.jwt)
 			authStore.userToken.accessToken = res.data.jwt
 			authStore.user = {
@@ -65,15 +70,19 @@ async function authLiff (): Promise<void> {
 				displayName: lineProfile.displayName
 			}
 		} else {
-			console.error('Authentication failed:', res)
+			console.error('❌ Authentication failed:', res)
 			throw new Error('Authentication failed')
 		}
 	} catch (error: any) {
 		console.error('Auth LIFF error:', error)
 		
-		// If authentication fails, try to login again
+		// If authentication fails, redirect to login immediately
 		if (error.response?.status === 401 || error.message?.includes('expired')) {
-			console.log('Token expired, redirecting to login...')
+			console.log('Authentication failed - redirecting to login')
+			liff.login()
+		} else {
+			// For other errors, also redirect to login
+			console.log('Authentication error - redirecting to login')
 			liff.login()
 		}
 	}
@@ -83,21 +92,12 @@ async function initializeApp(): Promise<void> {
 	try {
 		await initLiff()
 		if (liff.isLoggedIn()) {
+			console.log('✅ LIFF logged in, proceeding with authentication')
 			await authLiff()
-			// Set up periodic token check (every 10 minutes)
-			setInterval(async () => {
-				try {
-					const { refreshTokenIfNeeded } = await import('./plugin/liff.plugin')
-					const refreshed = await refreshTokenIfNeeded()
-					if (refreshed) {
-						console.log('Token refreshed automatically')
-						await authLiff()
-					}
-				} catch (error) {
-					console.error('Auto refresh failed:', error)
-				}
-			}, 10 * 60 * 1000) // 10 minutes
+			// Start token monitoring for our JWT tokens
+			tokenManager.startTokenMonitoring()
 		} else {
+			console.log('🔄 LIFF not logged in, attempting login')
 			await loginLiff()
 			setTimeout(async () => {
 				if (liff.isLoggedIn()) {
@@ -115,6 +115,11 @@ async function initializeApp(): Promise<void> {
 
 onMounted(async (): Promise<void> => {
 	await initializeApp()
+})
+
+onUnmounted((): void => {
+	// Clean up token monitoring
+	tokenManager.stopTokenMonitoring()
 })
 </script>
 

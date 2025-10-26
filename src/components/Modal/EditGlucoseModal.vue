@@ -1,86 +1,87 @@
 <template>
-	<div
-		v-if="isOpen"
-		class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-		<div class="bg-white rounded-2xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+	<BaseModal v-model:is-open="modalOpen">
+		<template #content>
 			<!-- Header -->
-			<div class="flex items-center justify-between p-6 border-b border-gray-100">
-				<h2 class="text-xl font-semibold text-gray-900">แก้ไขค่าน้ำตาล</h2>
+			<div class="flex items-center justify-between mb-6">
+				<div class="flex items-center space-x-3">
+					<div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+						<Icon icon="mdi:pencil" class="w-5 h-5 text-blue-600" />
+					</div>
+					<div>
+						<h2 class="text-xl font-semibold text-gray-900">แก้ไขค่าน้ำตาล</h2>
+						<p class="text-sm text-gray-500">ปรับปรุงข้อมูลระดับน้ำตาลในเลือด</p>
+					</div>
+				</div>
 				<button
 					@click="onClose"
 					class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
-					<Icon icon="mdi:close" class="w-5 h-5 text-gray-500" />
+					<Icon icon="mdi:close" class="w-5 h-5 text-gray-400" />
 				</button>
 			</div>
 
-			<!-- Content -->
-			<div class="p-6 space-y-6">
+			<!-- Form Content -->
+			<div class="space-y-6">
 				<!-- Glucose Value -->
-				<div>
-					<label class="block text-sm font-medium text-gray-700 mb-2">
-						ค่าระดับน้ำตาล (mg/dL)
-					</label>
-					<input
-						v-model.number="formData.value"
-						type="number"
-						placeholder="กรอกค่าระดับน้ำตาล"
-						class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-						min="1"
-						max="999" />
-				</div>
+				<BaseTextField
+					v-model="formData.value"
+					label="ค่าระดับน้ำตาล (mg/dL)"
+					type="number"
+					placeholder="กรอกค่าระดับน้ำตาล"
+					icon="mdi:water-outline"
+					:min="1"
+					:max="999"
+					required
+					:error-message="valueError"
+					helper-text="ค่าปกติ: 80-180 mg/dL" />
 
 				<!-- Period Selection -->
-				<div>
-					<label class="block text-sm font-medium text-gray-700 mb-2">
-						ช่วงเวลา
-					</label>
-					<select
-						v-model="formData.period"
-						class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-white">
-						<option value="">เลือกช่วงเวลา</option>
-						<option
-							v-for="(label, key) in GlucoseDailyPeriodsMap"
-							:key="key"
-							:value="key">
-							{{ label }}
-						</option>
-					</select>
-				</div>
+				<BaseDropdown
+					v-model="formData.period"
+					label="ช่วงเวลาการวัด"
+					placeholder="เลือกช่วงเวลา"
+					:options="GlucoseDailyPeriodsMap"
+					required
+					:error-message="periodError"
+					helper-text="เลือกช่วงเวลาที่ทำการวัด" />
 
 				<!-- Note -->
-				<div>
-					<label class="block text-sm font-medium text-gray-700 mb-2">
-						หมายเหตุ (ไม่บังคับ)
-					</label>
-					<textarea
-						v-model="formData.note"
-						placeholder="เพิ่มหมายเหตุ..."
-						rows="3"
-						class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"></textarea>
-				</div>
+				<BaseTextarea
+					v-model="formData.note"
+					label="หมายเหตุ"
+					placeholder="เพิ่มหมายเหตุเพิ่มเติม (ไม่บังคับ)"
+					:rows="3"
+					:max-length="200"
+					show-char-count
+					helper-text="บันทึกข้อมูลเพิ่มเติม เช่น อาการ หรือสิ่งที่สังเกตเห็น" />
 			</div>
+		</template>
 
-			<!-- Actions -->
-			<div class="flex gap-3 p-6 border-t border-gray-100">
-				<button
-					@click="onClose"
-					class="flex-1 px-4 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-colors">
-					ยกเลิก
-				</button>
-				<button
-					@click="onConfirm"
-					:disabled="!isFormValid"
-					class="flex-1 px-4 py-3 text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-xl font-medium transition-colors">
-					บันทึก
-				</button>
-			</div>
-		</div>
-	</div>
+		<template #actions>
+			<BaseButton
+				variant="outline"
+				size="md"
+				full-width
+				@click="onClose">
+				ยกเลิก
+			</BaseButton>
+			<BaseButton
+				variant="primary"
+				size="md"
+				full-width
+				:disabled="!isFormValid"
+				:loading="isSubmitting"
+				@click="onConfirm">
+				บันทึกการแก้ไข
+			</BaseButton>
+		</template>
+	</BaseModal>
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { Icon } from '@iconify/vue'
+import { BaseModal, BaseTextField, BaseTextarea, BaseButton } from '@/components/Base'
+import BaseDropdown from '@/components/Base/BaseDropdown.vue'
 import { GlucoseDailyPeriodsMap } from '@/models/Glucose/GlucoseDailyPeriods.enum'
 import type { IGlucoseToday } from '@/models/Response/GlucoseResponse.model'
 
@@ -97,14 +98,42 @@ interface IEmits {
 const props = defineProps<IProps>()
 const emits = defineEmits<IEmits>()
 
+const modalOpen = ref(props.isOpen)
+const isSubmitting = ref(false)
+
 const formData = reactive({
 	value: 0,
 	period: '',
 	note: ''
 })
 
+// Watch for isOpen prop changes
+watch(() => props.isOpen, (newValue) => {
+	modalOpen.value = newValue
+})
+
+// Watch for modal close
+watch(modalOpen, (newValue) => {
+	if (!newValue) {
+		emits('close')
+	}
+})
+
+// Form validation
 const isFormValid = computed(() => {
-	return formData.value > 0 && formData.period !== ''
+	return formData.value > 0 && formData.value <= 999 && formData.period !== ''
+})
+
+// Error messages
+const valueError = computed(() => {
+	if (formData.value <= 0) return 'กรุณากรอกค่าระดับน้ำตาล'
+	if (formData.value > 999) return 'ค่าระดับน้ำตาลสูงเกินไป'
+	return ''
+})
+
+const periodError = computed(() => {
+	if (!formData.period) return 'กรุณาเลือกช่วงเวลา'
+	return ''
 })
 
 // Watch for item changes to populate form
@@ -124,21 +153,28 @@ watch(() => props.isOpen, (isOpen) => {
 			formData.value = 0
 			formData.period = ''
 			formData.note = ''
+			isSubmitting.value = false
 		}, 300)
 	}
 })
 
 function onClose(): void {
-	emits('close')
+	modalOpen.value = false
 }
 
-function onConfirm(): void {
-	if (isFormValid.value) {
-		emits('confirm', {
-			value: formData.value,
-			period: formData.period,
-			note: formData.note || undefined
-		})
+async function onConfirm(): Promise<void> {
+	if (isFormValid.value && !isSubmitting.value) {
+		isSubmitting.value = true
+		
+		try {
+			emits('confirm', {
+				value: Number(formData.value),
+				period: formData.period,
+				note: formData.note || undefined
+			})
+		} finally {
+			isSubmitting.value = false
+		}
 	}
 }
 </script>
