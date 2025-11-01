@@ -100,7 +100,7 @@ interface Props {
   result: ILabResult
 }
 
-const props = defineProps<Props>()
+defineProps<Props>()
 
 const emit = defineEmits<{
   close: []
