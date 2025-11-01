@@ -131,31 +131,6 @@ function getStatusBarColor(status: AppointmentStatusEnum): string {
   }
 }
 
-function getStatusBadgeClass(status: AppointmentStatusEnum): string {
-  switch (status) {
-    case AppointmentStatusEnum.TODAY:
-      return 'bg-green-100 text-green-800'
-    case AppointmentStatusEnum.UPCOMING:
-      return 'bg-blue-100 text-blue-800'
-    case AppointmentStatusEnum.PAST:
-      return 'bg-gray-100 text-gray-600'
-    default:
-      return 'bg-gray-100 text-gray-600'
-  }
-}
-
-function getStatusText(status: AppointmentStatusEnum): string {
-  switch (status) {
-    case AppointmentStatusEnum.TODAY:
-      return 'วันนี้'
-    case AppointmentStatusEnum.UPCOMING:
-      return 'กำลังจะถึง'
-    case AppointmentStatusEnum.PAST:
-      return 'ผ่านไปแล้ว'
-    default:
-      return 'ไม่ทราบ'
-  }
-}
 
 function formatAppointmentDate(dateString: string | null): string {
   if (!dateString) return 'ไม่ระบุวันที่'
