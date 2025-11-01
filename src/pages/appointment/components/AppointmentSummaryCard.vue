@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-xl font-semibold text-gray-900">สรุปนัดหมาย</h2>
       <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">

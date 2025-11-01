@@ -11,7 +11,7 @@
       <!-- Tab Buttons -->
       <div class="relative flex">
         <button
-          v-for="(tab, index) in tabs"
+          v-for="(tab, index) in computedTabs"
           :key="tab.value"
           ref="tabRefs"
           @click="selectTab(tab.value, index)"
@@ -69,7 +69,8 @@ export interface FilterTab {
 
 interface Props {
   modelValue: string
-  tabs: FilterTab[]
+  tabs?: FilterTab[]
+  options?: { label: string; value: string }[]
 }
 
 interface Emits {
@@ -97,11 +98,18 @@ watch(selectedValue, (newValue) => {
   emits('change', newValue)
 })
 
+// Computed tabs
+const computedTabs = computed(() => {
+  if (props.tabs) return props.tabs
+  if (props.options) return props.options.map(opt => ({ ...opt, count: undefined, icon: undefined }))
+  return []
+})
+
 // Update background position
 async function updateBackgroundPosition(): Promise<void> {
   await nextTick()
   
-  const selectedIndex = props.tabs.findIndex(tab => tab.value === selectedValue.value)
+  const selectedIndex = computedTabs.value.findIndex(tab => tab.value === selectedValue.value)
   if (selectedIndex === -1 || !tabRefs.value[selectedIndex]) return
   
   const selectedTab = tabRefs.value[selectedIndex]
@@ -146,7 +154,7 @@ async function selectTab(value: string, index: number): Promise<void> {
 }
 
 // Initialize position
-watch(() => props.tabs, () => {
+watch(() => [props.tabs, props.options], () => {
   nextTick(() => {
     updateBackgroundPosition()
   })

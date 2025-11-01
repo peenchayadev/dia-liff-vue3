@@ -1,15 +1,53 @@
 <template>
   <div>
-    <!-- Loading State -->
-    <div v-if="isLoading" class="flex items-center justify-center py-12">
-      <div class="text-center">
-        <div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-        <p class="text-gray-600 text-base">กำลังโหลดข้อมูลนัดหมาย...</p>
+    <!-- Skeleton Loading State -->
+    <div v-if="isLoading">
+      <!-- Header Skeleton -->
+      <div class="mb-6 animate-pulse">
+        <div class="h-8 bg-gray-200 rounded-lg w-40 mb-2"></div>
+        <div class="h-5 bg-gray-200 rounded-lg w-72"></div>
+      </div>
+
+      <!-- Summary Card Skeleton -->
+      <div class="mb-8">
+        <div class="bg-white rounded-xl shadow-sm p-6 animate-pulse">
+          <div class="grid grid-cols-3 gap-4">
+            <div v-for="i in 3" :key="i" class="text-center p-4 bg-gray-100 rounded-lg">
+              <div class="h-8 bg-gray-200 rounded w-12 mx-auto mb-2"></div>
+              <div class="h-4 bg-gray-200 rounded w-16 mx-auto"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appointments List Skeleton -->
+      <div class="mb-8">
+        <div class="flex items-center mb-4 animate-pulse">
+          <div class="w-2 h-6 bg-green-300 rounded-full mr-3"></div>
+          <div class="h-6 bg-gray-200 rounded-lg w-32"></div>
+        </div>
+        <div class="space-y-4">
+          <div v-for="i in 2" :key="i" class="bg-white rounded-xl shadow-sm p-4 animate-pulse">
+            <div class="space-y-3">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-gray-200 rounded-lg"></div>
+                <div class="flex-1 space-y-2">
+                  <div class="h-5 bg-gray-200 rounded w-3/4"></div>
+                  <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <div class="h-8 bg-gray-200 rounded-lg flex-1"></div>
+                <div class="h-8 bg-gray-200 rounded-lg w-20"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     
     <!-- Error State -->
-    <div v-else-if="hasError" class="text-center py-12">
+    <div v-else-if="hasError" class="text-center py-12 animate-fade-in">
       <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
         <Icon icon="mdi:alert-circle" class="w-8 h-8 text-red-600" />
       </div>
@@ -23,7 +61,7 @@
     </div>
     
     <!-- Main Content -->
-    <div v-else>
+    <div v-else class="animate-fade-in">
       <!-- Header -->
       <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-900 mb-2">นัดหมายแพทย์</h1>
@@ -251,4 +289,32 @@ watch(() => authStore.userToken.accessToken, (newToken) => {
 })
 </script>
 
-<style scoped></style>
+<style scoped>
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+</style>

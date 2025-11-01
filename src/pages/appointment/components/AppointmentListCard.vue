@@ -11,7 +11,7 @@
       <div class="p-5">
         <div class="flex items-start space-x-4">
           <!-- Appointment Image -->
-          <div class="flex-shrink-0">
+          <div class="shrink-0">
             <div 
               v-if="appointment.media.length > 0"
               class="w-16 h-16 rounded-xl overflow-hidden bg-gray-100">
@@ -63,10 +63,6 @@
 
               <!-- Status Badge & Actions -->
               <div class="flex flex-col items-end space-y-3">
-                <span class="text-sm px-3 py-1.5 rounded-full font-medium"
-                  :class="getStatusBadgeClass(appointment.status)">
-                  {{ getStatusText(appointment.status) }}
-                </span>
 
                 <div class="flex items-center space-x-2">
                   <button @click.stop="onViewDetails(appointment)"

@@ -10,6 +10,8 @@ import {
 import mainRouter from './modules/main.router'
 import appointmentRouter from './modules/appointment.router'
 import foodRouter from './modules/food.router'
+import historyRouter from './modules/history.router'
+import labRouter from './modules/lab.router'
 
 export interface IRouteRedirect {
   name: string
@@ -23,7 +25,9 @@ export const routes: RouteRecordRaw[] = [
   },
   mainRouter,
   appointmentRouter,
-  foodRouter
+  foodRouter,
+  historyRouter,
+  labRouter
 ]
 
 export const routerConfig = {

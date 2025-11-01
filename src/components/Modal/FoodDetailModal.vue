@@ -9,7 +9,7 @@
               <Icon icon="mdi:food-apple" class="w-5 h-5 text-orange-600" />
             </div>
             <div>
-              <h2 class="text-xl font-semibold text-gray-900">รายละเอียดการวิเคราะห์อาหาร</h2>
+              <h2 class="text-xl font-semibold text-gray-900">รายละเอียด</h2>
               <p class="text-sm text-gray-500">ผลการวิเคราะห์จาก AI</p>
             </div>
           </div>

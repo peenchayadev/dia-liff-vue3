@@ -1,15 +1,39 @@
 <template>
   <div>
-    <!-- Loading State -->
-    <div v-if="isLoading" class="flex items-center justify-center py-12">
-      <div class="text-center">
-        <div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-        <p class="text-gray-600 text-base">กำลังโหลดข้อมูลอาหาร...</p>
+    <!-- Skeleton Loading State -->
+    <div v-if="isLoading">
+      <!-- Header Skeleton -->
+      <div class="mb-6 animate-pulse">
+        <div class="h-8 bg-gray-200 rounded-lg w-40 mb-2"></div>
+        <div class="h-5 bg-gray-200 rounded-lg w-64"></div>
+      </div>
+
+      <!-- Food List Skeleton -->
+      <div class="mb-8">
+        <div class="flex items-center mb-4 animate-pulse">
+          <div class="w-2 h-6 bg-orange-300 rounded-full mr-3"></div>
+          <div class="h-6 bg-gray-200 rounded-lg w-48"></div>
+        </div>
+        <div class="space-y-4">
+          <div v-for="i in 3" :key="i" class="bg-white rounded-xl shadow-sm p-4 animate-pulse">
+            <div class="flex gap-4">
+              <div class="w-24 h-24 bg-gray-200 rounded-lg flex-shrink-0"></div>
+              <div class="flex-1 space-y-3">
+                <div class="h-5 bg-gray-200 rounded w-3/4"></div>
+                <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+                <div class="flex gap-2">
+                  <div class="h-6 bg-gray-200 rounded-full w-20"></div>
+                  <div class="h-6 bg-gray-200 rounded-full w-24"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="hasError" class="text-center py-12">
+    <div v-else-if="hasError" class="text-center py-12 animate-fade-in">
       <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
         <Icon icon="mdi:alert-circle" class="w-8 h-8 text-red-600" />
       </div>
@@ -22,17 +46,13 @@
     </div>
 
     <!-- Main Content -->
-    <div v-else>
+    <div v-else class="animate-fade-in">
       <!-- Header -->
       <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-900 mb-2">วิเคราะห์อาหาร</h1>
         <p class="text-gray-600 text-base">ดูผลการวิเคราะห์อาหารจาก AI</p>
       </div>
 
-      <!-- Summary Card -->
-      <div class="mb-8">
-        <FoodSummaryCard :summary="summary" />
-      </div>
 
       <!-- Food Analyses List -->
       <div v-if="foodAnalyses && foodAnalyses.length > 0" class="mb-8">
@@ -70,7 +90,6 @@ import type { IFoodProvider } from '@/resources/provider/Food.provider'
 import type { IFoodAnalysis, IFoodSummary } from '@/models/Response/FoodResponse.model'
 import FoodDetailModal from '@/components/Modal/FoodDetailModal.vue'
 import FoodListCard from '../components/FoodListCard.vue'
-import FoodSummaryCard from '../components/FoodSummaryCard.vue'
 
 const authStore = useAuthStore()
 const foodService: IFoodProvider = new FoodProvider()
@@ -168,4 +187,32 @@ watch(
 )
 </script>
 
-<style scoped></style>
+<style scoped>
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+</style>
